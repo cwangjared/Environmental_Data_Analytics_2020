@@ -118,7 +118,7 @@ View(df01)
 Use the common functions `summary` and `sd` to obtain basic data summaries of the ten-day forecast. How would you call these functions differently for the entire data frame vs. a single column? Attempt to demonstrate both options below.
 
 ```{r}
-
+summary(df01)
 ```
 
 
