@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Introduction"
-author: "Student Name"
+author: "Jared Wang"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -22,21 +22,20 @@ The completed exercise is due on Tuesday, January 14th at 1:00 pm.
 
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I have taken an undergraduate course called Environmental Data Analysis with R. The courses focused on data clean up and subset, and included a little bit data visualization and analysis, e.g. Q-Q plot, etc. I used packages such as ggplot, tidyr, and dplyr. I have no previous experience with Git.
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I am relatively confident about the course content in January
 
 3. Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
-
+> Answer: I am relatively unfamiliar with time series data, spatial data exploration, and metadata.
 
 ## 2) GitHub
 
-Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
+Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/cwangjared/Environmental_Data_Analytics_2020
 
 
