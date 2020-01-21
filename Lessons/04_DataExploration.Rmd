@@ -67,10 +67,10 @@ You may also import datasets from the Files tab, but this is not recommended sin
 USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # What happens if we don't assign a name to our imported dataset?
-#read.csv("../Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+# read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # Another option is to choose with your browser
-# read.csv(file.choose())
+# read.csv(file.choose()) ##but this approach is not reproducible
 
 # To import .txt files, use read.table rather than read.csv
 #read.table()
@@ -80,7 +80,7 @@ USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 ## EXPLORE YOUR DATASET
 
 Take a moment to read through the README file associated with the USGS dataset on discharge at the Eno River. Where can you find this file? How does the placement and information found in this file relate to the best practices for reproducible data analysis?
-> ANSWER: 
+> ANSWER: it is found in the metadata folder. The folder serves to provide extra information on the dataset. It is separated from the data folder to avoid confusion.
 
 ```{r}
 View(USGS.flow.data)
@@ -100,6 +100,7 @@ colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime",
 str(USGS.flow.data)
 dim(USGS.flow.data)
 length(USGS.flow.data)
+nrow(USGS.flow.data)
 
 head(USGS.flow.data)
 head(USGS.flow.data, 10)
@@ -115,7 +116,7 @@ summary(USGS.flow.data)
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> Answer: 
+> Answer: if they are numeric, they become NA data cells
 
 ## Adjusting Datasets
 
@@ -168,11 +169,11 @@ help(as.Date)
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
+format(today, format = "%Y-%m-%d")
 #format(today, format = "")
 #format(today, format = "")
 
-USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") 
+USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y-%m-%d")
 ```
 
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
