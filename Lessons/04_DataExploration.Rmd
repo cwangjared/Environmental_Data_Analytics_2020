@@ -173,7 +173,7 @@ format(today, format = "%Y-%m-%d")
 #format(today, format = "")
 #format(today, format = "")
 
-USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y-%m-%d")
+USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") ##the date format matters
 ```
 
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
@@ -184,7 +184,7 @@ USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
 
 #
 create.early.dates <- (function(d) {
-       paste0(ifelse(d > 181231,"19","20"),d)
+       paste0(ifelse(d > 191231,"19","20"),d)
        })
 #
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
@@ -201,7 +201,7 @@ We just edited our raw dataset into a processed form. We may want to return to t
 
 ```{r}
 write.csv(USGS.flow.data, file = "./Data/Processed/USGS_Site02085000_Flow_Processed.csv", row.names=FALSE)
-
+getwd()
 ```
 
 

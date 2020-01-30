@@ -31,7 +31,7 @@ library(tidyverse)
 # 3. Import datasets
 USGS.flow.data <- read.csv("./Data/Processed/USGS_Site02085000_Flow_Processed.csv")
 
-#View(USGS.flow.data)
+# View(USGS.flow.data)
 # Alternate option: click on data frame in Environment tab
 
 colnames(USGS.flow.data)
@@ -88,13 +88,20 @@ ggplot(USGS.flow.data, aes(x = discharge.mean)) +
 ggplot(USGS.flow.data) +
   geom_histogram(aes(x = gage.height.mean))
 
+#to save the plots
+#gageplot <- ggplot(USGS.flow.data) +
+  #geom_histogram(aes(x = gage.height.mean))
+#print(gageplot)
+
 ```
 ### Frequency line graph (function: geom_freqpoly)
 
 An alternate to a histogram is a frequency polygon graph (distributions of values for continuous numerical variables). Instead of displaying bars,  counts of continuous variables are displayed as lines. This is advantageous if you want to display multiple variables or categories of variables at once.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+#examples of different line types & colors
+#search "r color" for more colors
+#search "r line types" for more line types
 ggplot(USGS.flow.data) +
   geom_freqpoly(aes(x = gage.height.mean), bins = 50) +
   geom_freqpoly(aes(x = gage.height.min), bins = 50, color = "darkgray") +
@@ -103,7 +110,10 @@ ggplot(USGS.flow.data) +
 
 #
 ggplot(USGS.flow.data) +
-  geom_freqpoly(aes(x = gage.height.mean, color = gage.height.mean.approval), bins = 50) +
+  geom_freqpoly(aes(x = gage.height.mean
+                    , color = gage.height.mean.approval
+                    ), 
+                bins = 50) +
   scale_x_continuous(limits = c(0, 10)) +
   theme(legend.position = "top")
 
@@ -127,14 +137,16 @@ An alternate option is a violin plot, which displays density distributions, some
 ggplot(USGS.flow.data) +
   geom_boxplot(aes(x = gage.height.mean.approval, y = gage.height.mean))
 
-#
+# boxplot against mean gage height
 ggplot(USGS.flow.data) +
   geom_boxplot(aes(x = gage.height.mean, y = discharge.mean, group = cut_width(gage.height.mean, 1)))
 
 #
 ggplot(USGS.flow.data) +
   geom_violin(aes(x = gage.height.mean.approval, y = gage.height.mean), 
-              draw_quantiles = c(0.25, 0.5, 0.75))
+              draw_quantiles = c(0.25, 0.5, 0.75),
+              scale = "count",
+              color = "gray")
 ```
 
 ### Scatterplot (function: geom_point)
