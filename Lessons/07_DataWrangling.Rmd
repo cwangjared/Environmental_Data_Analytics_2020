@@ -69,7 +69,8 @@ NTL.nutrient.data.PeterPaul.subset <- select(NTL.nutrient.data.PeterPaul,
                                              lakename, year4, daynum, month, sampledate, depth:po4)
 
 # write a more succinct line of code to subset the nutrient dataset. 
-
+NTL.nutrient.data.PeterPaul.subset <- select(NTL.nutrient.data.PeterPaul, 
+                                             lakename:sampledate, depth:po4)
 ```
 
 
@@ -87,6 +88,7 @@ Note: `tidyr` is moving away from `gather` and `spread` and toward `pivot_longer
 ```{r}
 # Gather nutrient data into one column
 NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.subset, "nutrient", "concentration", tn_ug:po4)
+
 NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration))
 count(NTL.nutrient.data.PeterPaul.gathered, nutrient)
 
@@ -112,7 +114,7 @@ In many cases, we will want to combine datasets into one dataset. If all column 
 In dplyr, there are several types of join functions: 
 
 * `inner_join`: return rows in x where there are matching values in y, and all columns in x and y (mutating join).
-* `semi_join`: return all rows from x where there are matching values in  y, keeping just columns from x (filtering join).
+* `semi_join`: return all rows from x where there are matching values in y, keeping just columns from x (filtering join).
 * `left_join`: return all rows from x, and all columns from x and y (mutating join).
 * `anti_join`: return all rows from x where there are *not* matching values in y, keeping just columns from x (filtering join).
 * `full_join`: return all rows and all columns from x and y. Returns NA for missing values (mutating join).
@@ -185,6 +187,7 @@ NTL.PeterPaul.summaries <-
 
 write.csv(NTL.PeterPaul.summaries, row.names = FALSE, 
           file ="./Data/Processed/NTL-LTER_Lake_Summaries_PeterPaul_Processed.csv")
+
 
 ```
 

@@ -127,9 +127,10 @@ Arranging allows us to change the order of rows in our dataset. By default, the 
 ```{r}
 NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth)
 NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
-
+#View(NTL.phys.data.depth.ascending)
+#View(NTL.phys.data.depth.descending)
 # Exercise: 
-# Arrange NTL.phys.data by temperature, in descending order. 
+# Arrange NTL.phys.data by temperature, in descending order.
 # Which dates, lakes, and depths have the highest temperatures?
 
 
@@ -159,7 +160,7 @@ A package that makes coercing date much easier is `lubridate`. A guide to the pa
 ```{r}
 # add a month column to the dataset
 NTL.phys.data.PeterPaul1 <- mutate(NTL.phys.data.PeterPaul1, month = month(sampledate)) 
-
+View(NTL.phys.data.PeterPaul1)
 # reorder columns to put month with the rest of the date variables
 NTL.phys.data.PeterPaul1 <- select(NTL.phys.data.PeterPaul1, lakeid:daynum, month, sampledate:comments)
 
