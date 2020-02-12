@@ -17,6 +17,10 @@ editor_options:
 ```{r, message = FALSE, warning = FALSE}
 getwd()
 library(tidyverse)
+library(colormap)
+library(cowplot)
+library(viridis)
+library(ggridges)
 
 PeterPaul.chem.nutrients <- 
   read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
@@ -105,7 +109,7 @@ O3plot7 <- ggplot(EPAair, aes(x = Date, y = Ozone)) +
     date_breaks = "2 months", date_labels = "%b %y") +
   ylab(expression("O"[3]* " AQI Value")) +
   theme(axis.text.x = element_text(angle = 45,  hjust = 1))
-print(O3plot7)  
+print(O3plot7)
 
 ```
 
@@ -175,10 +179,12 @@ print(NvsP)
 NvsP2 <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
   geom_point(alpha = 0.7, size = 2.5) +
-  #labs() + # change your legend labels here
+  labs(x = expression(paste("TP (", mu, "g/L)")),
+       y = expression(paste("TN (", mu, "g/L)")),
+       color = "Depth (m)", shape = "") + # change your legend labels here
   scale_shape_manual(values = c(15, 17)) +
-  #scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
-  scale_color_viridis(option = "magma", direction = -1) +
+  scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
+  #scale_color_viridis(option = "magma", direction = -1) +
   theme(legend.position = "right", 
         legend.text = element_text(size = 12), legend.title = element_text(size = 12))
 print(NvsP2)
@@ -187,14 +193,19 @@ print(NvsP2)
 # remove your x axis label
 # change labels for nutrients in the legend
 # try out the different color palette options and choose one (or edit)
+
 Nutrientplot <-
-  ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration, color = nutrient)) +
+  ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, 
+                                                y = concentration,
+                                                color = nutrient)) +
   geom_boxplot() +
-# place your additional edits here
+  labs(x ="",
+       y = "Total Nitrogen (ng)") +
   scale_y_continuous(expand = c(0, 0)) +
   #scale_color_brewer(palette = "YlGnBu") +
-  #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
+  scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
   #scale_color_viridis(discrete = TRUE, end = 0.8) +
+  #scale_color_distiller(palette = "Blues", direction = 1) + 
   theme(legend.position = "right")
 print(Nutrientplot)
 ```

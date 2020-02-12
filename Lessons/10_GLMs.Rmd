@@ -17,6 +17,7 @@ editor_options:
 ```{r, message = FALSE}
 getwd()
 library(tidyverse)
+library(ggplot2)
 
 EPAair <- read.csv("./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv")
 
@@ -75,8 +76,8 @@ O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
 O3.onesample
 
 Ozone.plot <- ggplot(EPAair, aes(x = Ozone)) +
-  #geom_density(stat = "count", fill = "gray") +
-  geom_density(fill = "gray") +
+  geom_density(stat = "count", fill = "gray") +
+  #geom_density(fill = "gray") +
   geom_vline(xintercept = 50, color = "#238b45", lty = 2, size = 0.9) +
   scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
 print(Ozone.plot)
@@ -84,7 +85,7 @@ print(Ozone.plot)
 
 Write a sentence or two about the results of this test. Include both the results of the test and an interpretation that puts the findings in context of the resarch question.
 
-> 
+> EPA ozone measurements for 2018 - 2019 were significantly lower than 50, the AQI threshold for "good" air quality (t-test; t = -57.98, p < 0.0001).
 
 ### Two-sample t-test
 The two-sample *t* test is used to test the hypothesis that the mean of two samples is equivalent. Unlike the one-sample tests, a two-sample test requires a second assumption that the variance of the two groups is equivalent. Are Ozone levels different between 2018 and 2019?
@@ -129,8 +130,25 @@ Create three plots, each with appropriately formatted axes and legends. Choose a
 3. geom_violin of ozone divided by year, with the 0.5 quantile marked as a horizontal line. Add letters representing a significant difference between 2018 and 2019. 
 
 ```{r}
+den.o3 <- ggplot(EPAair) +
+  geom_density(aes(x = Ozone, fill = as.factor(Year)), alpha = 0.5) +
+  labs(x = "Ozone", y = "Density", fill = "Year") +
+  theme_bw()
+plot(den.o3)
 
+box.o3 <- ggplot(EPAair) + 
+  geom_boxplot(aes(x = as.factor(Year), y = Ozone)) +
+  theme_bw()
+plot(box.o3)
 
+vio.o3 <- ggplot(EPAair) +
+  geom_violin(aes(x = as.factor(Year), y = Ozone)) +
+  geom_hline(yintercept = quantile(na.omit(EPAair$Ozone), 0.5), 
+             color = "lightskyblue3") +
+  theme_bw()
+plot(vio.o3)
+
+ quantile(c(1,2,3,4),0.75)
 ```
 
 Now, write a summary of your findings, incorporating statistical output, reference to the figure(s), and a contextual interpretation.

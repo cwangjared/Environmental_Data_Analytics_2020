@@ -62,13 +62,13 @@ func.dfexplor(pm2019)
 ```{r}
 #oz2018 dataset
 oz2018 <- oz2018 %>%
-  mutate(Date = as.Date(Date, format = "%m/%d/%y")) %>% # question 3
+  mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>% # question 3
   select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, 
          SITE_LATITUDE, SITE_LONGITUDE) # question 4
 
 #oz2019 dataset
 oz2019 <- oz2019 %>%
-  mutate(Date = as.Date(Date, format = "%m/%d/%y")) %>% # question 3
+  mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>% # question 3
   select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, 
          SITE_LATITUDE, SITE_LONGITUDE) # question 4
 
