@@ -95,7 +95,7 @@ ggplot(NTL.summertemp, aes(x = sampledate, y = temperature_C, color = lakename))
 print(NTLtemps)
 ```
 
-Next, we will build a hierarchical model. We will use the package `nlme` for our analyses. Another good package for running hierarchical, or mixed-effects, models is `lme4`. For the basic types of hierarchical models, these packages have about the same functionality. We will set year year (continuous) as a fixed effect and lake (categorical) as a random effect. Remember that we are interested in assessing if summer surface temperatures have increased in response to climate change and to account for the inter-lake variability within the model.
+Next, we will build a hierarchical model. We will use the package `nlme` for our analyses. Another good package for running hierarchical, or mixed-effects, models is `lme4`. For the basic types of hierarchical models, these packages have about the same functionality. We will set year (continuous) as a fixed effect and lake (categorical) as a random effect. Remember that we are interested in assessing if summer surface temperatures have increased in response to climate change and to account for the inter-lake variability within the model.
 
 
 ```{r}

@@ -17,6 +17,8 @@ editor_options:
 getwd()
 library(tidyverse)
 library(agricolae)
+library(FSA)
+library(dunn.test)
 
 Litter <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
 
@@ -75,7 +77,7 @@ summary(Litter.Totals.anova2)
 plot(Litter.Totals.anova2)
 
 # Post-hoc test
-TukeyHSD(Litter.Totals.anova)
+TukeyHSD(Litter.Totals.anova) #only works for an aov object
 
 # Extract groupings for pairwise relationships
 Litter.Totals.groups <- HSD.test(Litter.Totals.anova, "plotID", group = TRUE)
@@ -110,9 +112,11 @@ Litter.kw <- kruskal.test(Litter.Totals$dryMass ~ Litter.Totals$plotID)
 Litter.kw
 
 # There are two functions to run the Dunn Test
-# dunn.test(Litter.Totals$dryMass, Litter.Totals$plotID, kw = T, 
-#           table = F, list = T, method = "holm", altp = T)   #From package dunn.test
-# dunnTest(Litter.Totals$dryMass, Litter.Totals$plotID)                    #From package FSA
+#From package dunn.test
+dunn.test(Litter.Totals$dryMass, Litter.Totals$plotID, kw = T, 
+           table = F, list = T, method = "holm", altp = T) 
+#From package FSA
+dunnTest(Litter.Totals$dryMass, Litter.Totals$plotID)
 ```
 
 ## TWO-WAY ANOVA

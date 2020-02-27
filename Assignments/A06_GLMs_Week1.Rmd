@@ -1,11 +1,14 @@
 ---
 title: "Assignment 6: GLMs week 1 (t-test and ANOVA)"
-author: "Student Name"
+author: "Jared Wang"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
   chunk_output_type: console
 ---
+```{r setup,include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
 
 ## OVERVIEW
 
@@ -27,12 +30,21 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 2. Change the date column to a date format. Call up `head` of this column to verify.
 
 
-```{r, message = FALSE}
+```{r}
 #1
-
-
+getwd()
+library(tidyverse)
+library(cowplot)
+library(agricolae)
+library(FSA)
+library(dunn.test)
+library(ggthemes)
+df.lk <- 
+  read.csv("../Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
 #2
-
+df.lk <- mutate(df.lk, sampledate = as.Date(sampledate, "%Y-%m-%d"))
+class(df.lk$sampledate)
+head(df.lk$sampledate)
 ```
 
 
@@ -40,8 +52,9 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 3. Wrangle your dataset so that it contains only surface depths and only the years 1993-1996, inclusive. Set month as a factor.
 ```{r}
-
-
+df.lk0 <- df.lk %>%
+  filter(depth == 0 & year4 %in% c(1993:1996)) %>%
+  mutate(month = as.factor(month))
 ```
 
 ## Analysis
@@ -50,30 +63,102 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 4. Which application of the GLM will you use (t-test, one-way ANOVA, two-way ANOVA with main effects, or two-way ANOVA with interaction effects)? Justify your choice.
 
-> Answer: 
+> Answer: Because influence of seasonality on water column nutrient levels is likely to be influenced by other factors of a lake (e.g. size & depth), I expect that the effects of seasonality and lake name on surface nutrient level are dependent on each other. Therefore, would use two-way ANOVA with interaction effects.
 
 5. Run your test for TN. Include examination of groupings and consider interaction effects, if relevant.
 
 6. Run your test for TP. Include examination of groupings and consider interaction effects, if relevant.
 
 ```{r}
-#5
+#5 - ANOVA for TP
+#format as aov
+aov.tp <- aov(data = df.lk0, tp_ug ~ month * lakename)
+summary(aov.tp)
+#format as lm
+lm.tp <- lm(data = df.lk0, tp_ug ~ month * lakename)
+#post-hoc test for pairwise differences
+TukeyHSD(aov.tp)
+tp.int <- with(df.lk0, interaction(month, lakename))
+aov.tp.int <- aov(data = df.lk0, tp_ug ~ tp.int)
+tp.groups <- HSD.test(aov.tp.int, trt = "tp.int", group = TRUE)
+tp.groups
 
-
-#6
-
+#6 - ANOVA for TN
+aov.tn <- aov(data = df.lk0, tn_ug ~ month * lakename)
+summary(aov.tn)
+#format as lm
+lm.tn <- lm(data = df.lk0, tn_ug ~ month * lakename)
+summary(lm.tn)
+#ignore interactions
+aov.tn.maineff <- aov(data = df.lk0, tn_ug ~ month + lakename)
+summary(aov.tn.maineff)
+#post-hoc test for pairwise differences
+TukeyHSD(aov.tn.maineff)
+tn.int <- with(df.lk0, interaction(month, lakename))
+aov.tn.int <- aov(data = df.lk0, tn_ug ~ tn.int)
+tn.groups <- HSD.test(aov.tn.int, "tn.int", group = TRUE)
+tn.groups
 
 ```
+
 
 7. Create two plots, with TN (plot 1) or TP (plot 2) as the response variable and month and lake as the predictor variables. Hint: you may use some of the code you used for your visualization assignment. Assign groupings with letters, as determined from your tests. Adjust your axes, aesthetics, and color palettes in accordance with best data visualization practices.
 
 8. Combine your plots with cowplot, with a common legend at the top and the two graphs stacked vertically. Your x axes should be formatted with the same breaks, such that you can remove the title and text of the top legend and retain just the bottom legend. 
 
-```{r}
+```{r, fig.width = 8, fig.height = 7.2}
 #7
+#set the theme
+theme.hc01.legendtop <- theme_hc() +
+  theme(axis.title = element_text(family = "serif", size = (10)),
+       axis.text = element_text(family = "serif", size = (8), color = "black"), 
+       legend.title = element_text(size = 10, family = "serif"),
+       legend.text = element_text(size = 10, family = "serif"),
+       legend.key = element_rect(color = NA, fill = NA),
+       legend.background = element_rect(color = NA, fill = NA),
+       legend.position = c(0.2, 0.9))
 
+theme.hc01.nolegend <- theme_hc() +
+  theme(axis.title = element_text(family = "serif", size = (10)),
+       axis.text = element_text(family = "serif", size = (8), color = "black"), 
+       legend.title = element_text(size = 10, family = "serif"),
+       legend.text = element_text(size = 10, family = "serif"),
+       legend.key = element_rect(color = NA, fill = NA),
+       legend.background = element_rect(color = NA, fill = NA),
+       legend.position = "none")
+
+#plot TP
+box.tp <- ggplot(df.lk0, aes(x = month, y = tp_ug, 
+                   color = lakename, fill = lakename)) +
+  geom_boxplot(alpha = 0.8) + 
+  labs(x = "Month", 
+       y = expression(paste("Total Phosphorous (", mu, "g)")),
+       color = "", fill = "") + 
+  scale_color_manual(values = c("cadetblue4", "cornsilk3")) +
+  scale_fill_manual(values = c("cadetblue4", "cornsilk3")) + 
+  stat_summary(geom = "text", fun.y = max, vjust = -1, size = 4,
+               label = c("bcd", "cd", "ab", "d", "a", "d", 
+                         "abc", "d", "abcd", "cd"),
+               position = position_dodge(width = 0.75)) +
+  theme.hc01.legendtop
+#plot TN
+box.tn <- ggplot(df.lk0, aes(x = month, y = tn_ug, 
+                   color = lakename, fill = lakename)) +
+  geom_boxplot(alpha = 0.8) + 
+  labs(x = "Month", 
+       y = expression(paste("Total Nitrogen (", mu, "g)")),
+       color = "", fill = "") + 
+  scale_y_continuous(limits = c(0, 1000)) +
+  scale_color_manual(values = c("cadetblue4", "cornsilk3")) +
+  scale_fill_manual(values = c("cadetblue4", "cornsilk3")) + 
+  stat_summary(geom = "text", fun.y = max, vjust = -1, size = 4,
+               label = c("b", "ab", "ab", "ab", "b", 
+                         "a", "b", "a", "ab", "ab"),
+               position = position_dodge(width = 0.75)) +
+  theme.hc01.nolegend
 
 #8
+plot_grid(box.tp, box.tn, nrow = 2)
 
 ```
 

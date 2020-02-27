@@ -1,11 +1,14 @@
 ---
 title: "Assignment 7: GLMs week 2 (Linear Regression and beyond)"
-author: "Student Name"
+author: "Jared Wang"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
+```{r setup,include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
 
 ## OVERVIEW
 
@@ -18,19 +21,36 @@ This exercise accompanies the lessons in Environmental Data Analytics on general
 6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
 8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "Salk_A06_GLMs_Week1.Rmd") prior to submission.
 
-The completed exercise is due on Tuesday, February 25 at 1:00 pm.
+The completed exercise is due on Thursday, February 27 at 1:00 pm.
 
 ## Set up your session 
 1. Set up your session. Check your working directory, load the tidyverse, nlme, and piecewiseSEM packages, import the *raw* NTL-LTER raw data file for chemistry/physics, and import the processed litter dataset. You will not work with dates, so no need to format your date columns this time.
 
 2. Build a ggplot theme and set it as your default theme.
 
-```{r}
+```{r, results = 'hide'}
 #1
+getwd()
+library(tidyverse)
+library(nlme)
+library(piecewiseSEM)
+library(gridExtra)
+library(ggthemes)
 
+df.lter <- read.csv("../Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
 
 #2
+theme.hc01 <- theme_hc() +
+  theme(axis.title = element_text(family = "serif", size = (10)),
+       axis.text = element_text(family = "serif", size = (8), color = "black"), 
+       legend.title = element_text(size = 10, family = "serif"),
+       legend.text = element_text(size = 10, family = "serif"),
+       legend.key = element_rect(color = NA, fill = NA),
+       legend.background = element_rect(color = NA, fill = NA),
+       legend.position = "right")
 
+
+theme_set(theme_classic())
 ```
 
 
@@ -46,33 +66,52 @@ Research question: What is the best set of predictors for lake temperatures in J
 4. Run an AIC to determine what set of explanatory variables (year4, daynum, depth) is best suited to predict temperature. Run a multiple regression on the recommended set of variables. 
 
 ```{r}
-#3
-
+#3 - did not use daynum because February has 29 days in some years
+df.lter.jul <- df.lter %>%
+  filter(daynum > 181 & daynum < 213) %>%
+  select(lakename, year4, daynum, depth, temperature_C) %>%
+  na.exclude()
 
 #4
-
+lm.temp.aic <- lm(data = df.lter.jul, temperature_C ~ depth + year4 + daynum)
+step(lm.temp.aic)
+#no variable excluded, keep the model the same
+lm.temp <- lm(data = df.lter.jul, temperature_C ~ depth + year4 + daynum)
+summary(lm.temp)
 ```
 
 5. What is the final set of explanatory variables that predict temperature from your multiple regression? How much of the observed variance does this model explain?
 
-> Answer: 
+> Answer: all three variables (day, year, and depth) predict temperature (p < 0.01). The model explains 74.1% of observed variance.
 
 6. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
 ```{r}
 #6
-
+# main effects
+lm.temp.int <- lm(data = df.lter.jul, temperature_C ~ depth*lakename)
+summary(lm.temp.int)
 ```
 
 7. Is there a significant interaction between depth and lakename? How much variance in the temperature observations does this explain?
 
-> Answer: 
+> Answer: There is a significant interaction between depth and lakename (p < 0.001). The model explains 78.57% of observed temperature.
 
 8. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
 ```{r}
 #8
+point.temp <- ggplot(df.lter.jul, 
+                    aes(x = depth, y = temperature_C, color = lakename), 
+                    size = 0.8, alpha = 0.5) +
+  geom_point() + 
+  labs(x = "Depth (m)", y = "Temperature (C)") + 
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_y_continuous(limits = c(0, 35)) + 
+  scale_color_viridis_d() +
+  theme.hc01
 
+plot(point.temp)
 ```
 
 9. Run a mixed effects model to predict dry mass of litter. We already know that nlcdClass and functionalGroup have a significant interaction, so we will specify those two variables as fixed effects with an interaction. We also know that litter mass varies across plot ID, but we are less interested in the actual effect of the plot itself but rather in accounting for the variance among plots. Plot ID will be our random effect.
@@ -81,21 +120,34 @@ a. Build and run a mixed effects model.
 b. Check the difference between the marginal and conditional R2 of the model. 
 
 ```{r}
+#data preparation
+df.lit0 <- read.csv("../Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
+df.lit <- df.lit0 %>%
+  select(dryMass, nlcdClass, functionalGroup, plotID) %>%
+  na.exclude()
 
+#a. mixed effect model - WHAT IS 1 FOR??? - WHAT IS THE DIF. BTW LM & GLS???
+lme.lit <- lme(data = df.lit, dryMass ~ nlcdClass*functionalGroup, 
+                     random = ~1|plotID)
+summary(lme.lit)
 
+#b. check the difference between marginal and conditional R2
+rsquared(lme.lit)
 ```
 
 b. continued... How much more variance is explained by adding the random effect to the model? 
 
-> Answer: 2 %
+> Answer: About 2% more variance is explained by adding the random effect.
 
 c. Run the same model without the random effect.
 d. Run an anova on the two tests. 
 ```{r}
- 
+gls.lit <- gls(data = df.lit, dryMass ~ nlcdClass*functionalGroup)
+summary(gls.lit)
 
+anova(lme.lit, gls.lit)
 ```
 
 d. continued... Is the mixed effects model a better model than the fixed effects model? How do you know?
 
-> Answer: 
+> Answer: the mixed effects model is a better model, because it has a smaller AIC. The difference between the two models is statistically different (p < 0.001).
