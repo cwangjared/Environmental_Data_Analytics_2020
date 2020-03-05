@@ -5,7 +5,7 @@ date: "Spring 2020"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ## Objectives
@@ -30,10 +30,10 @@ mytheme <- theme_classic(base_size = 14) +
         legend.position = "top")
 theme_set(mytheme)
 
-EnoDischarge <- read.csv("./Data/Processed/USGS_Site02085000_Flow_Processed.csv")
+EnoDischarge <- read.csv("../Data/Processed/USGS_Site02085000_Flow_Processed.csv")
 EnoDischarge$datetime <- as.Date(EnoDischarge$datetime, format = "%Y-%m-%d")
 
-NCAir <- read.csv("./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv")
+NCAir <- read.csv("../Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv")
 NCAir$Date <- as.Date(NCAir$Date, format = "%Y-%m-%d")
 ```
 
@@ -103,6 +103,7 @@ Note: time series objects must be equispaced. In our case, we have daily data wi
 
 ```{r}
 EnoDischarge.late_ts <- ts(EnoDischarge.late[[8]], frequency = 365)
+View(EnoDischarge.late_ts)
 ```
 
 The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
@@ -115,6 +116,7 @@ EnoDischarge.late_Decomposed <- stl(EnoDischarge.late_ts, s.window = "periodic")
 # Visualize the decomposed series. 
 plot(EnoDischarge.late_Decomposed)
 
+class(EnoDischarge.late_Decomposed$time.series)
 # We can extract the components and turn them into data frames
 EnoDischarge.late_Components <- as.data.frame(EnoDischarge.late_Decomposed$time.series[,1:3])
 EnoDischarge.late_Components <- mutate(EnoDischarge.late_Components,
@@ -197,7 +199,7 @@ Common interpolation methods:
 The Eno River discharge data doesn't have any short periods of missing data, so interpolation would not be a good choice for that dataset. We will illustrate a linear interpolation of the NC Air quality dataset below. 
 
 In this case, several sites have a lot of missing data, and several sites monitor most days with few missing data points. 
-```{r}
+```{r, fig.height = 9.6}
 NCOzone <-
 ggplot(NCAir, aes(x = Date, y = Ozone)) +
   geom_point() +
@@ -268,6 +270,9 @@ EnoDischarge.late.monthly$Date <- as.Date(paste(EnoDischarge.late.monthly$Year,
 # Generate time series (smk.test needs ts, not data.frame)
 EnoDischarge.late.monthly.ts <- ts(EnoDischarge.late.monthly$Discharge, frequency = 12, 
                         start = c(1985, 10, 1), end = c(2019, 12, 1))
+View(EnoDischarge.late.monthly.ts)
+View(Eno)
+
 # Run SMK test
 EnoDischarge.late.trend <- smk.test(EnoDischarge.late.monthly.ts)
 
@@ -284,8 +289,8 @@ print(EnoDischarge.monthly)
 
 What would we conclude based on these findings? 
 
->
- 
+> 
+
 If a significant trend was present, we could compute a **Sen's Slope** to quantify that trend (`sens.slope` function in the trend package).
 
 

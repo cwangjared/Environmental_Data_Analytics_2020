@@ -1,11 +1,14 @@
 ---
 title: "Assignment 8: Time Series Analysis"
-author: "Student Name"
+author: "Jared Wang"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
+```{r setup,include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
 
 ## OVERVIEW
 
@@ -28,9 +31,31 @@ The completed exercise is due on Tuesday, March 3 at 1:00 pm.
 * Set your ggplot theme
 * Import the ten datasets from the Ozone_TimeSeries folder in the Raw data folder. These contain ozone concentrations at Garinger High School in North Carolina from 2010-2019 (the EPA air database only allows downloads for one year at a time). Call these GaringerOzone201*, with the star filled in with the appropriate year in each of ten cases.
 
-```{r, message = FALSE}
+```{r, results = 'hide'}
+(.packages())
+library(plyr)
+library(dplyr)
+library(tidyverse)
+library(lubridate)
+library(zoo)
+library(trend)
+library(ggthemes)
 
+getwd()
 
+#set plot theme
+theme.1.0 <- theme_classic()
+theme_set(theme.1.0)
+
+theme.hc01 <- theme_hc() +
+  theme(axis.title = element_text(family = "serif", size = (10)),
+       axis.text = element_text(family = "serif", size = (8), color = "black"))
+
+#read data files
+ls.oz.ts <- 
+  list.files(path = "../Data/Raw/Ozone_TimeSeries/", pattern="*.csv", full.names=TRUE)
+GaringerOzone.temp <- ls.oz.ts %>%
+  ldply(read.csv)
 ```
 
 ## Wrangle
@@ -46,20 +71,30 @@ The completed exercise is due on Tuesday, March 3 at 1:00 pm.
 6. Use a `left_join` to comine the data frames. Specify the correct order of data frames within this function so that the final dimensions are 3652 rows and 3 columns. Call your combined data frame GaringerOzone. 
 
 ```{r}
-# 2 
+#-------------------------2----------------------
+#This step is done in step 1, using the ldply function. Otherwise I would use a row bind. 
+#A sample code would be:
+#df.2010 <- read.csv("a.csv")
+#df.2011 <- read.csv("b.csv")
+#df.2012 <- read.csv("c.csv")
+# ...
+#df.2019 <- read.csv("j.csv")
+#GaringerOzone <- rbind(df.2010, df.2011, ..., df.2019)
 
+#-------------------------3 & 4----------------------
+GaringerOzone <- GaringerOzone.temp %>%
+  mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>%
+  mutate(date = Date,
+         oz8h = Daily.Max.8.hour.Ozone.Concentration,
+         aqi = DAILY_AQI_VALUE) %>%
+  select(date, oz8h, aqi)
 
-# 3
+#-------------------------5---------------------- 
+date <- seq(as.Date('2010-01-01'),as.Date('2019-12-31'), by = 1)
+Days <- data.frame(date)
 
-
-# 4
-
-
-# 5
-
-
-# 6
-
+#-------------------------6-------------------------
+GaringerOzone <- left_join(Days, GaringerOzone)
 
 ```
 
@@ -67,9 +102,13 @@ The completed exercise is due on Tuesday, March 3 at 1:00 pm.
 
 7. Create a ggplot depicting ozone concentrations over time. In this case, we will plot actual concentrations in ppm, not AQI values. Format your axes accordingly.
 
-```{r}
+```{r, fig.width = 8, fig.height = 2.4}
+scat.ozone <- ggplot(GaringerOzone, aes(x = date, y = oz8h)) + 
+  geom_point(size = 0.8, alpha = 1, color = "lightskyblue3") + 
+  labs(x = "Date", y = "Ozone (PPM)") +
+  theme.hc01
 
-
+plot(scat.ozone)
 ```
 
 ## Time Series Analysis
@@ -78,7 +117,7 @@ Study question: Have ozone concentrations changed over the 2010s at this station
 
 8. Use a linear interpolation to fill in missing daily data for ozone concentration. Why didn't we use a piecewise constant or spline interpolation?
 
-> Answer: 
+> Answer: The change in ozone concentration follows a linear trend.
 
 9. Create a new data frame called GaringerOzone.monthly that contains aggregated data: mean ozone concentrations for each month. In your pipe, you will need to first add columns for year and month to form the groupings. In a separate line of code, create a new Date column with each month-year combination being set as the first day of the month (this is for graphing purposes only)
 
@@ -86,33 +125,48 @@ Study question: Have ozone concentrations changed over the 2010s at this station
 
 11. Run a time series analysis. In this case the seasonal Mann-Kendall is most appropriate; why is this?
 
-> Answer: 
+> Answer: The seasonal Man-Kendall analysis includes seasonality, while many other methods do not.
 
 12. To figure out the slope of the trend, run the function `sea.sens.slope` on the time series dataset. 
 
 13. Create a plot depicting mean monthly ozone concentrations over time, with both a geom_point and a geom_line layer. No need to add a line for the seasonal Sen's slope; this is difficult to apply to a graph with time as the x axis. Edit your axis labels accordingly.
 
 ```{r}
-# 8
+#----------------------8 & 9-----------------------
+GaringerOzone.monthly <- GaringerOzone %>%
+  mutate(oz8h = na.approx(oz8h)) %>%
+  mutate(year = year(date),
+         month = month(date)) %>%
+  group_by(year, month) %>%
+  summarise(oz8h = mean(oz8h)) %>%
+  mutate(date = as.Date(paste(year, month, 1, sep = "-", 
+                              format = "%Y-%m-%d")))
 
 
-# 9
+##----------------------10-----------------------
+GaringerOzone.monthly.ts <- ts(GaringerOzone.monthly$oz8h, frequency = 12, 
+                        start = c(2010, 1, 1), end = c(2019, 12, 31))
 
+#----------------------11-----------------------
+Ozone.trend <- smk.test(GaringerOzone.monthly.ts)
 
-# 10
+Ozone.trend
+summary(Ozone.trend)
 
+#----------------------12-----------------------
+Ozone.slope <- sea.sens.slope(GaringerOzone.monthly.ts)
 
-# 11
- 
+Ozone.slope
 
-# 12
-
-
-# 13
-
-
+#----------------------13-----------------------
+scat.ozone.monthly <- ggplot(GaringerOzone.monthly, aes(x = date, y = oz8h)) + 
+  geom_line(alpha = 1, color = "lightskyblue3") + 
+  geom_point(color = "lightskyblue4", size = 0.8) +
+  labs(x = "Date", y = "Ozone (PPM)") +
+  theme.hc01
+plot(scat.ozone.monthly)
 ```
 
 14. To accompany your graph, summarize your results in context of the research question. Include output from the statistical test in parentheses at the end of your sentence. Feel free to use multiple sentences in your interpretation.
 
-> Answer: 
+> Answer: From 2010 to 2019, there is a statistically significant decline in monthly average ozone concentrations (z = -1.963, p-value = 0.04965). However, the change between consecutive years is not significant (p-value > 0.05).

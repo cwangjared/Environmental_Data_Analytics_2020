@@ -57,6 +57,7 @@ library("here")
 Please make sure that the pdf() command works on your computer.
 
 ```{r check.pdf}
+getwd()
 pdf(here("outputs", "pdf_test.pdf"), width = 11, height = 8.5)
 ggplot(data = cars) +
   geom_point(aes(x = dist, y = speed))
@@ -279,9 +280,10 @@ I like to always save a copy of the raw data in my R session and rename all new 
 
 ```{r activity.load.data}
 # add your code here
-gages_raw <- 
+gages_raw <- st_read(here("data", "spatial_data", "gagesII_9322_sept30_2011.shp"))
 southeast_state_bounds_raw <- 
-my_tabular_data_raw <- 
+  st_read(here("data", "spatial_data", "southeast_state_bounds.shp"))
+my_tabular_data_raw <- read.csv(here("data", "tabular_data", "conterm_climate.txt"))
 
 # red warning text is telling you how the data is being parsed
 ```
@@ -304,7 +306,12 @@ Use base R commands to answer the following questions (for basins_nf_seplains_ra
 ```{r activity.check.out.data}
 
 # add your code here
+sf.sum <- basins_nf_seplains_raw
 
+class(sf.sum)
+colnames(sf.sum)
+ncol(sf.sum)
+attributes(sf.sum)
 # bonus, add your code here
 ```
 
@@ -325,6 +332,10 @@ Use st_crs() to look at the CRSs of the spatial data you have loaded up so far. 
 
 ```{r activity.check.out.data.again}
 # add your code here
+st_crs(basins_nf_seplains_raw)
+st_crs(gages_raw)
+st_crs(southeast_state_bounds_raw)
+st_crs(my_tabular_data_raw)
 
 # first two will not have EPSG code but have proj4 string (i.e., "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
 
@@ -371,8 +382,8 @@ Last, check the CRSs of each.
 ```{r activity.setting.projecting}
 # define proj4 string and EPSG code
 # add your code here
-my_proj4 <- 
-my_epsg <- 
+my_proj4 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 + x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+my_epsg <- 5070
 
 # setting projections
 # set the proj4 string first and then set the EPSG code (because proj4 will over-ride EPSG if you set EPSG first)
@@ -398,8 +409,6 @@ na_albers_epsg <-
 # check CRSs
 # add your code here
 ```
-
-### 2.6 Converting sp Objects to sf Objects and Vice Versa
 
 If you're using other (likely older) types of spatial data, R may not recognize them as sf objects. For example, a collaborator may give you some older code that uses the sp package to generate spatial data. First, make sure to double check the class using class(). If the object is not an sf object, you can use st_as_sf() or st_as_sfc() to convert your data to sf or sfc objects.
 
