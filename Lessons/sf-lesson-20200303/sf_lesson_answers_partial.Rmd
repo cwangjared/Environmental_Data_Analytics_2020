@@ -7,7 +7,7 @@ output:
   html_document: default
   pdf_document: default
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include = FALSE}
@@ -515,6 +515,7 @@ class(southeast_state_bounds_geometry)
 In other cases, you might just want to keep the tabular data (attributes) associated with spatial data. To remove geometry you can use the st_drop_geometry() command.
 
 ```{r dropping.geometry}
+#the command above is really interesting
 # geometry data is attached
 head(southeast_state_bounds)
 southeast_state_bounds_tabular <- st_drop_geometry(southeast_state_bounds)
